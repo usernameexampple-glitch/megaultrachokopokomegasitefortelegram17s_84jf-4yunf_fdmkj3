@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>David-PC</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: var(--tg-theme-bg-color, #1c1c1e);
+    --fg: var(--tg-theme-text-color, #fff);
+    --accent: var(--tg-theme-button-color, #2481cc);
+    --accent-fg: var(--tg-theme-button-text-color, #fff);
+    --card: var(--tg-theme-secondary-bg-color, #2c2c2e);
+    --hint: var(--tg-theme-hint-color, #8e8e93);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px;
+    background: var(--bg); color: var(--fg);
+    font: 15px -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--hint); margin-bottom: 16px; font-size: 13px; }
+  .section { margin-bottom: 18px; }
+  .section h2 { font-size: 13px; text-transform: uppercase; color: var(--hint); margin: 0 0 8px; letter-spacing: .5px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  button {
+    background: var(--card); color: var(--fg);
+    border: 0; border-radius: 12px; padding: 14px 12px;
+    font-size: 15px; cursor: pointer; text-align: left;
+    transition: transform .05s;
+  }
+  button:active { transform: scale(.97); }
+  button.primary { background: var(--accent); color: var(--accent-fg); }
+  input, textarea {
+    width: 100%; background: var(--card); color: var(--fg);
+    border: 0; border-radius: 12px; padding: 12px;
+    font: inherit; margin-bottom: 8px;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+</style>
+</head>
+<body>
+  <h1>🖥 David-PC</h1>
+  <div class="sub">Управление через Telegram Web App</div>
+
+  <div class="section">
+    <h2>Система</h2>
+    <div class="grid">
+      <button onclick="send('sys_status')">📊 Статус</button>
+      <button onclick="send('sys_hw')">🧩 Железо</button>
+      <button onclick="send('sys_screen')">📸 Скриншот</button>
+      <button onclick="send('proc_list')">⚙ Процессы</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Сказать вслух</h2>
+    <textarea id="say_text" placeholder="Текст для озвучки..."></textarea>
+    <div class="row">
+      <input id="say_voice" type="number" placeholder="Голос #" min="0" style="max-width:90px">
+      <input id="say_rate" type="number" placeholder="Скорость -10..10" value="0">
+    </div>
+    <button class="primary" onclick="doSay()">🗣 Сказать</button>
+  </div>
+
+  <div class="section">
+    <h2>Окно на ПК (MessageBox)</h2>
+    <input id="box_title" placeholder="Заголовок">
+    <textarea id="box_text" placeholder="Текст окна..."></textarea>
+    <button class="primary" onclick="doBox()">💬 Показать окно</button>
+  </div>
+
+  <div class="section">
+    <h2>Прочее</h2>
+    <div class="grid">
+      <button onclick="send('troll_caps')">💡 Caps Lock</button>
+      <button onclick="send('troll_rickroll')">🎵 Рикролл</button>
+    </div>
+  </div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  function send(action, payload = {}) {
+    tg.sendData(JSON.stringify({ action, ...payload }));
+    tg.close();
+  }
+  function doSay() {
+    const text = document.getElementById('say_text').value.trim();
+    if (!text) { tg.showAlert('Введи текст'); return; }
+    const voice = document.getElementById('say_voice').value;
+    const rate = document.getElementById('say_rate').value || 0;
+    send('say', { text, voice: voice === '' ? null : +voice, rate: +rate });
+  }
+  function doBox() {
+    const title = document.getElementById('box_title').value.trim() || 'Сообщение';
+    const text = document.getElementById('box_text').value.trim();
+    if (!text) { tg.showAlert('Введи текст'); return; }
+    send('box', { title, text });
+  }
+</script>
+</body>
+</html>
